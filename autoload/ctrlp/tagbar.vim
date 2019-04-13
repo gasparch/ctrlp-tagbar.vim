@@ -24,13 +24,13 @@ let g:loaded_ctrlp_tagbar = 1
 "                      |     `- match full line like file/dir path
 "                      `- match full line
 let s:tagbar_var = {
-      \ 'init': 'ctrlp#tagbar#init(s:crfile)',
+      \ 'init':   'ctrlp#tagbar#init()',
       \ 'accept': 'ctrlp#tagbar#accept',
-      \ 'lname': 'tagbar',
-      \ 'sname': 'tbar',
-      \ 'type': 'line',
-      \ 'sort'  : 0,
-      \ 'nolim' : 1,
+      \ 'lname':  'tagbar',
+      \ 'sname':  'tbar',
+      \ 'type':   'line',
+      \ 'sort':   0,
+      \ 'nolim':  1,
       \ }
 
 
@@ -45,9 +45,19 @@ endif
 " Provide a list of strings to search in
 "
 " Return: command
-function! ctrlp#tagbar#init(fname)
-  let tag_list = tagbar#currenttags(a:fname)
-  let tag_list = filter(tag_list, '!empty(v:val)')
+function! ctrlp#tagbar#init()
+  let tag_list = []
+  try
+    let tagdict = tagbar#state#get_current_file(0)._tagdict
+    let tag_list = keys(tagdict)
+  catch
+  endtry
+
+  if empty(tag_list)
+    return ''
+  endif
+
+  call filter(tag_list, '!empty(v:val)')
   return tag_list
 endfunction
 
@@ -60,7 +70,19 @@ endfunction
 "  a:str    the selected string
 func! ctrlp#tagbar#accept(mode, str)
   call ctrlp#exit()
-  call tagbar#jumptotag(a:str)
+
+  let taginfo = []
+  try
+    let tagsinfo = tagbar#state#get_current_file(0)
+    let taginfo = tagsinfo.getTagsByName(a:str)
+  catch
+  endtry
+
+  if empty(taginfo)
+    return 
+  endif
+
+  execute taginfo[0].fields.line
 endfunc
 
 
