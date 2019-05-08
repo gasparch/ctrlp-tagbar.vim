@@ -53,10 +53,6 @@ function! ctrlp#tagbar#init()
   catch
   endtry
 
-  if empty(tag_list)
-    return ''
-  endif
-
   call filter(tag_list, '!empty(v:val)')
   return tag_list
 endfunction
@@ -78,11 +74,9 @@ func! ctrlp#tagbar#accept(mode, str)
   catch
   endtry
 
-  if empty(taginfo)
-    return 
+  if !empty(taginfo)
+    execute taginfo[0].fields.line
   endif
-
-  execute taginfo[0].fields.line
 endfunc
 
 
